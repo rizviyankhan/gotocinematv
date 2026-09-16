@@ -49,11 +49,18 @@ export const TVRemoteOverlay: React.FC<TVRemoteOverlayProps> = ({ isOpen, onClos
 
   const handleSpatialFocus = (direction: string) => {
     const focusableSelector = 'button:not([disabled]), [tabindex="0"], a[href], input:not([disabled])';
-    const focusable = Array.from(document.querySelectorAll<HTMLElement>(focusableSelector))
+    const activeModal = (document.activeElement?.closest('#search-modal-container, #watchlist-modal-container') ||
+      document.querySelector('#search-modal-container, #watchlist-modal-container')) as HTMLElement | null;
+
+    let focusable = Array.from(document.querySelectorAll<HTMLElement>(focusableSelector))
       .filter(el => {
         const rect = el.getBoundingClientRect();
         return rect.width > 0 && rect.height > 0 && !el.closest('#virtual-tv-remote');
       });
+
+    if (activeModal) {
+      focusable = focusable.filter(el => activeModal.contains(el));
+    }
 
     if (focusable.length === 0) return;
 

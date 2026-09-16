@@ -9,6 +9,7 @@ import { PlayerView } from './components/PlayerView';
 import { SearchModal } from './components/SearchModal';
 import { WatchlistView } from './components/WatchlistView';
 import { TVRemoteOverlay } from './components/TVRemoteOverlay';
+import { InfiniteMediaSection } from './components/InfiniteMediaSection';
 import { useTVNavigation } from './hooks/useTVNavigation';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 
@@ -227,6 +228,13 @@ export default function App() {
                 />
               ))}
             </div>
+
+            {/* Infinite Scrolling Content Stream for Movies, TV Shows, and Anime */}
+            <InfiniteMediaSection
+              key={`infinite-sec-${activeCategory}`}
+              category={activeCategory}
+              onSelectMedia={handlePlayDirect}
+            />
           </div>
         )}
       </main>

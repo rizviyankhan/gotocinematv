@@ -8,13 +8,17 @@ interface MediaCardProps {
   onSelect: (media: TMDBMedia) => void;
   index?: number;
   rowId?: string;
+  isGrid?: boolean;
+  className?: string;
 }
 
 export const MediaCard: React.FC<MediaCardProps> = ({
   media,
   onSelect,
   index = 0,
-  rowId = 'row'
+  rowId = 'row',
+  isGrid = false,
+  className = ''
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -30,6 +34,10 @@ export const MediaCard: React.FC<MediaCardProps> = ({
     ? `${IMAGE_BASE_W500}${media.backdrop_path}`
     : null;
 
+  const widthClass = isGrid 
+    ? 'w-full' 
+    : 'flex-shrink-0 w-[150px] sm:w-[180px] md:w-[200px]';
+
   return (
     <div
       id={`card-${rowId}-${index}`}
@@ -42,7 +50,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({
           onSelect(media);
         }
       }}
-      className="tv-focusable group relative flex-shrink-0 w-[150px] sm:w-[180px] md:w-[200px] rounded-xl overflow-hidden cursor-pointer bg-slate-900 border border-white/10 hover:border-sky-400 focus-visible:border-sky-400 transition-all duration-200 transform hover:scale-105"
+      className={`tv-focusable group relative ${widthClass} rounded-xl overflow-hidden cursor-pointer bg-slate-900 border border-white/10 hover:border-sky-400 focus-visible:border-sky-400 transition-all duration-200 transform ${isGrid ? 'hover:scale-[1.03]' : 'hover:scale-105'} ${className}`}
     >
       {/* Aspect Ratio 2:3 container */}
       <div className="relative w-full pb-[150%] bg-slate-800">

@@ -149,6 +149,74 @@ export const tmdbService = {
     return fetchFromTMDB<TMDBSeasonDetails>(`/tv/${tvId}/season/${seasonNumber}`);
   },
 
+  // Infinite Scroll Paginated Fetchers
+  async getInfiniteMovies(page: number, genreId?: string): Promise<{ results: TMDBMedia[]; totalPages: number }> {
+    try {
+      const params: Record<string, string> = {
+        page: String(page),
+        sort_by: 'popularity.desc',
+        'vote_count.gte': '25'
+      };
+      if (genreId && genreId.trim() !== '') {
+        params.with_genres = genreId;
+      }
+      const data = await fetchFromTMDB<{ results: TMDBMedia[]; total_pages: number }>('/discover/movie', params);
+      const results = (data.results || []).map((m) => ({ ...m, media_type: 'movie' as const }));
+      return { results, totalPages: data.total_pages || 500 };
+    } catch (err) {
+      console.error(`Failed to fetch infinite movies page ${page}:`, err);
+      return { results: [], totalPages: 1 };
+    }
+  },
+
+  async getInfiniteTV(page: number, genreId?: string): Promise<{ results: TMDBMedia[]; totalPages: number }> {
+    try {
+      const params: Record<string, string> = {
+        page: String(page),
+        sort_by: 'popularity.desc',
+        'vote_count.gte': '15'
+      };
+      if (genreId && genreId.trim() !== '') {
+        params.with_genres = genreId;
+      }
+      const data = await fetchFromTMDB<{ results: TMDBMedia[]; total_pages: number }>('/discover/tv', params);
+      const results = (data.results || []).map((t) => ({ ...t, media_type: 'tv' as const }));
+      return { results, totalPages: data.total_pages || 500 };
+    } catch (err) {
+      console.error(`Failed to fetch infinite TV page ${page}:`, err);
+      return { results: [], totalPages: 1 };
+    }
+  },
+
+  async getInfiniteAnime(page: number, genreId?: string): Promise<{ results: TMDBMedia[]; totalPages: number }> {
+    try {
+      if (genreId === 'movies') {
+        // Japanese animation movies
+        const data = await fetchFromTMDB<{ results: TMDBMedia[]; total_pages: number }>('/discover/movie', {
+          with_genres: '16',
+          with_original_language: 'ja',
+          sort_by: 'popularity.desc',
+          page: String(page)
+        });
+        const results = (data.results || []).map((m) => ({ ...m, media_type: 'movie' as const }));
+        return { results, totalPages: data.total_pages || 500 };
+      }
+
+      const params: Record<string, string> = {
+        with_genres: genreId && genreId !== '' ? `16,${genreId}` : '16',
+        with_original_language: 'ja',
+        sort_by: 'popularity.desc',
+        page: String(page)
+      };
+      const data = await fetchFromTMDB<{ results: TMDBMedia[]; total_pages: number }>('/discover/tv', params);
+      const results = (data.results || []).map((a) => ({ ...a, media_type: 'tv' as const }));
+      return { results, totalPages: data.total_pages || 500 };
+    } catch (err) {
+      console.error(`Failed to fetch infinite Anime page ${page}:`, err);
+      return { results: [], totalPages: 1 };
+    }
+  },
+
   // Search
   async searchMulti(query: string): Promise<TMDBMedia[]> {
     if (!query.trim()) return [];

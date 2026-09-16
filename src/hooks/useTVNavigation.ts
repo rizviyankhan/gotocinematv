@@ -42,7 +42,12 @@ export function useTVNavigation(options?: {
 
         const focusableSelector =
           'button:not([disabled]):not([tabindex="-1"]), [tabindex="0"], a[href], input:not([disabled])';
-        const allFocusable = Array.from(
+        
+        // Check if an active modal is open on screen
+        const activeModal = (document.activeElement?.closest('#search-modal-container, #watchlist-modal-container') ||
+          document.querySelector('#search-modal-container, #watchlist-modal-container')) as HTMLElement | null;
+
+        let allFocusable = Array.from(
           document.querySelectorAll<HTMLElement>(focusableSelector)
         ).filter((el) => {
           const rect = el.getBoundingClientRect();
@@ -53,6 +58,11 @@ export function useTVNavigation(options?: {
             window.getComputedStyle(el).visibility !== 'hidden'
           );
         });
+
+        // If inside an open modal, constrain directional navigation exclusively to that modal
+        if (activeModal) {
+          allFocusable = allFocusable.filter((el) => activeModal.contains(el));
+        }
 
         if (allFocusable.length === 0) return;
 
